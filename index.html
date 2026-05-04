@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <title>今日祝福</title>
+  <title>祝福连弹</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -12,80 +12,22 @@
       font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
       background: linear-gradient(160deg, #ffeef8 0%, #e8f4ff 45%, #fff9e6 100%);
       display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-    }
-    .hint {
-      color: #888;
-      font-size: 0.9rem;
-      text-align: center;
-    }
-    .mask {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.35);
-      display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       padding: 1.25rem;
-      z-index: 1000;
-      animation: fadeIn 0.25s ease;
-    }
-    .mask.hidden { display: none; }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    .card {
-      background: #fff;
-      border-radius: 1rem;
-      padding: 1.75rem 1.5rem;
-      max-width: 18rem;
-      width: 100%;
       text-align: center;
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
-      animation: pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
-    @keyframes pop {
-      from { transform: scale(0.85); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
-    }
-    .card .emoji {
-      font-size: 2.5rem;
-      line-height: 1;
-      margin-bottom: 0.5rem;
-    }
-    .card .msg {
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: #333;
-      line-height: 1.5;
-      margin: 0 0 1rem;
-    }
-    .card button {
-      width: 100%;
-      border: none;
-      border-radius: 999px;
-      padding: 0.65rem 1rem;
-      font-size: 1rem;
-      color: #fff;
-      background: linear-gradient(90deg, #ff8fb1, #a78bfa);
-      cursor: pointer;
-    }
-    .card button:active { opacity: 0.9; }
+    h1 { font-size: 1.1rem; color: #444; margin: 0 0 0.5rem; font-weight: 600; }
+    .tip { font-size: 0.85rem; color: #888; line-height: 1.5; max-width: 20rem; }
+    .done { margin-top: 1rem; font-size: 1rem; color: #333; font-weight: 600; display: none; }
+    .done.show { display: block; }
   </style>
 </head>
 <body>
-  <p class="hint">关闭弹窗后仍在本页</p>
-
-  <div id="mask" class="mask" role="dialog" aria-modal="true" aria-labelledby="msg">
-    <div class="card">
-      <div class="emoji" id="emoji" aria-hidden="true">✨</div>
-      <p class="msg" id="msg">加载中…</p>
-      <button type="button" id="closeBtn">收到啦</button>
-    </div>
-  </div>
+  <h1>祝福正在接连弹出</h1>
+  <p class="tip">请依次点「确定」关闭每个系统提示框，共 99 条且不重复。若没有任何弹窗，请检查浏览器是否拦截了本页弹窗。</p>
+  <p id="done" class="done" role="status">全部 99 条已送达～今天也要好好的。</p>
 
   <script>
     (function () {
@@ -190,17 +132,33 @@
         { text: "你正在成为你想成为的人。", emoji: "🌱" },
         { text: "最后一句话还是想说：天天开心！", emoji: "🌸" }
       ];
-      var one = lines[Math.floor(Math.random() * lines.length)];
-      document.getElementById("msg").textContent = one.text;
-      document.getElementById("emoji").textContent = one.emoji;
 
-      function closePopup() {
-        document.getElementById("mask").classList.add("hidden");
+      function shuffle(arr) {
+        var a = arr.slice();
+        for (var i = a.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var t = a[i];
+          a[i] = a[j];
+          a[j] = t;
+        }
+        return a;
       }
-      document.getElementById("closeBtn").addEventListener("click", closePopup);
 
-      // 微信里部分版本对系统 alert 体验一般，上面用自定义弹窗；如需再弹一层系统框可取消下一行注释：
-      // setTimeout(function () { alert(one.text); }, 400);
+      function run() {
+        var order = shuffle(lines);
+        var n = order.length;
+        for (var i = 0; i < n; i++) {
+          var item = order[i];
+          alert("【" + (i + 1) + " / " + n + "】" + item.emoji + "\n\n" + item.text);
+        }
+        document.getElementById("done").classList.add("show");
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", run);
+      } else {
+        run();
+      }
     })();
   </script>
 </body>
