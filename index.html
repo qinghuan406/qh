@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>今日祝福</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: linear-gradient(160deg, #ffeef8 0%, #e8f4ff 45%, #fff9e6 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .hint {
+      color: #888;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+    .mask {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.25rem;
+      z-index: 1000;
+      animation: fadeIn 0.25s ease;
+    }
+    .mask.hidden { display: none; }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .card {
+      background: #fff;
+      border-radius: 1rem;
+      padding: 1.75rem 1.5rem;
+      max-width: 18rem;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+      animation: pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes pop {
+      from { transform: scale(0.85); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .card .emoji {
+      font-size: 2.5rem;
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+    .card .msg {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #333;
+      line-height: 1.5;
+      margin: 0 0 1rem;
+    }
+    .card button {
+      width: 100%;
+      border: none;
+      border-radius: 999px;
+      padding: 0.65rem 1rem;
+      font-size: 1rem;
+      color: #fff;
+      background: linear-gradient(90deg, #ff8fb1, #a78bfa);
+      cursor: pointer;
+    }
+    .card button:active { opacity: 0.9; }
+  </style>
+</head>
+<body>
+  <p class="hint">关闭弹窗后仍在本页</p>
+
+  <div id="mask" class="mask" role="dialog" aria-modal="true" aria-labelledby="msg">
+    <div class="card">
+      <div class="emoji" id="emoji" aria-hidden="true">✨</div>
+      <p class="msg" id="msg">加载中…</p>
+      <button type="button" id="closeBtn">收到啦</button>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var lines = [
+        { text: "天天开心，事事顺心！", emoji: "🌸" },
+        { text: "今天也要对自己温柔一点～", emoji: "💛" },
+        { text: "你超棒的，继续加油！", emoji: "⭐" },
+        { text: "愿你所遇皆温暖，所行皆坦途。", emoji: "🌈" },
+        { text: "记得喝水、早点休息呀。", emoji: "🍵" },
+        { text: "平安喜乐，万事胜意。", emoji: "✨" },
+        { text: "心若向阳，无惧悲伤。", emoji: "☀️" },
+        { text: "慢慢来，你一直在进步。", emoji: "🌿" },
+        { text: "今天的小目标：开心就好。", emoji: "🎈" },
+        { text: "愿有人懂你沉默，也有人陪你热闹。", emoji: "🫶" },
+        { text: "累的时候就歇一歇，不丢人。", emoji: "☕" },
+        { text: "你值得被好好对待，尤其是被自己。", emoji: "💖" },
+        { text: "好运正在路上，请保持微笑。", emoji: "🍀" },
+        { text: "平凡的日子里也有小确幸。", emoji: "🌻" },
+        { text: "别急，花会开，你也会越来越好。", emoji: "🌺" },
+        { text: "愿你三餐温暖，四季安然。", emoji: "🍊" },
+        { text: "做自己喜欢的事，慢一点也没关系。", emoji: "🎵" },
+        { text: "明天的你会感谢今天努力的自己。", emoji: "💪" },
+        { text: "世界很大，此刻的不快只是很小的一部分。", emoji: "🌙" },
+        { text: "给自己一个拥抱，你真的已经很好了。", emoji: "🤗" },
+        { text: "愿心事有处说，愿疲惫有处歇。", emoji: "🕊️" },
+        { text: "阳光会穿过云层照到你身上。", emoji: "☀️" },
+        { text: "把烦恼留给昨天，把希望留给今天。", emoji: "🌈" },
+        { text: "你是独一无二的存在，自带光芒。", emoji: "💫" },
+        { text: "愿所有等待，都有最好的回应。", emoji: "🎀" },
+        { text: "今天也要元气满满呀！", emoji: "⭐" },
+        { text: "温柔待世，也别忘了温柔待己。", emoji: "🌸" },
+        { text: "每一步都算数，你并没有白费力气。", emoji: "🔮" },
+        { text: "愿生活明朗，万物可爱。", emoji: "🦋" },
+        { text: "与其内耗，不如好好睡一觉。", emoji: "🌙" },
+        { text: "你的坚强，会有人看得见。", emoji: "💜" },
+        { text: "小步向前，也是在靠近梦想。", emoji: "🎈" },
+        { text: "愿你有诗有酒，也有远方可奔赴。", emoji: "🌈" },
+        { text: "不完美也没关系，真实最动人。", emoji: "💛" },
+        { text: "今天气象台：局部开心，全域祝福。", emoji: "☀️" },
+        { text: "累了就抬头看看天空，它包容一切。", emoji: "🌿" },
+        { text: "愿有人与你立黄昏，有人问你粥可温。", emoji: "🍵" },
+        { text: "你笑起来的样子，真的很好看。", emoji: "🥰" },
+        { text: "别否定自己，你超级重要。", emoji: "💖" },
+        { text: "今日宜：开心、放松、善待自己。", emoji: "✨" },
+        { text: "把期待降低，把把握当下放大。", emoji: "🌻" },
+        { text: "愿你夜里有灯，梦里有人爱。", emoji: "🌙" },
+        { text: "每一次尝试，都值得掌声。", emoji: "👏" },
+        { text: "心情不好时，允许自己短暂断电。", emoji: "🔋" },
+        { text: "你所担心的事，大多都不会发生。", emoji: "🍀" },
+        { text: "愿你有底气说“不”，有勇气说“要”。", emoji: "💪" },
+        { text: "辛苦啦，今天也安全通关了。", emoji: "🎮" },
+        { text: "日子长长，总会遇到刚刚好的人和事。", emoji: "🌸" },
+        { text: "愿你被岁月温柔以待。", emoji: "💐" },
+        { text: "做一个内心有光的人，不急不躁。", emoji: "🕯️" },
+        { text: "坏消息会过去，好消息在路上。", emoji: "📮" },
+        { text: "你不需要完美，才值得被爱。", emoji: "💝" },
+        { text: "愿你的付出，终有温柔的回报。", emoji: "🌺" },
+        { text: "今天给自己一个小奖励吧～", emoji: "🎁" },
+        { text: "路虽远行则可至，事虽难做则可成。", emoji: "🛤️" },
+        { text: "别比较，每个人都有自己的花期。", emoji: "🌼" },
+        { text: "愿你在人群里不迷失，独处时不孤单。", emoji: "🫶" },
+        { text: "放松肩膀，深呼吸，一切都会好起来。", emoji: "🧘" },
+        { text: "你是生活的主角，不是配角。", emoji: "🎬" },
+        { text: "愿你所爱皆所得，所失亦无憾。", emoji: "💫" },
+        { text: "再坚持一下，天就快亮了。", emoji: "🌅" },
+        { text: "小小进步也值得大声夸奖自己。", emoji: "📣" },
+        { text: "愿你有钱有闲有情有趣。", emoji: "💰" },
+        { text: "把“我不行”换成“我试试”。", emoji: "✨" },
+        { text: "世界喜欢勇敢的人，而你很勇敢。", emoji: "🦁" },
+        { text: "难过会淡，难题会解，日子会亮。", emoji: "🌈" },
+        { text: "愿你有梦可追，有家可归。", emoji: "🏠" },
+        { text: "今天阳光免费，喜乐也免费。", emoji: "☀️" },
+        { text: "不赶时间的时候，看看路边的花。", emoji: "🌷" },
+        { text: "你心里的那团火，别让它熄灭。", emoji: "🔥" },
+        { text: "愿福运常伴你左右。", emoji: "🧧" },
+        { text: "哭过笑过，都是成长的礼物。", emoji: "🎀" },
+        { text: "给自己一个肯定：你已经做得很好。", emoji: "👍" },
+        { text: "愿微风带走疲惫，星光点亮希望。", emoji: "⭐" },
+        { text: "不喜欢的过去，就留在昨天吧。", emoji: "📅" },
+        { text: "你能点开这条，就值得被祝福。", emoji: "💌" },
+        { text: "愿工作顺心，生活顺心，万事顺心。", emoji: "🎯" },
+        { text: "允许一切发生，然后慢慢好起来。", emoji: "🌊" },
+        { text: "你配得上一切好的安排。", emoji: "👑" },
+        { text: "把心事写下来，就给心腾出了地方。", emoji: "📝" },
+        { text: "愿你三餐烟火暖，四季衣裳安。", emoji: "🍚" },
+        { text: "慢慢来，比较快；稳稳走，比较远。", emoji: "🐢" },
+        { text: "你的善良，自有它的回响。", emoji: "🔔" },
+        { text: "愿烦恼像气球一样飞走～", emoji: "🎈" },
+        { text: "今天也要好好吃饭，身体最重要。", emoji: "🥢" },
+        { text: "愿你眼里有光，心中有爱。", emoji: "✨" },
+        { text: "想到你，就觉得世界温柔了一点。", emoji: "🌍" },
+        { text: "不要怕走得慢，只怕停下来。", emoji: "🚶" },
+        { text: "愿你我都能在琐碎里捡到糖。", emoji: "🍬" },
+        { text: "你的努力不是笑话，是伏笔。", emoji: "📖" },
+        { text: "总有一天，你会感谢没放弃的自己。", emoji: "🙌" },
+        { text: "愿好运像信号一样满格～", emoji: "📶" },
+        { text: "给自己一个微笑，开启温柔模式。", emoji: "😊" },
+        { text: "愿你有盔甲也有软肋，有人懂也有人宠。", emoji: "🛡️" },
+        { text: "今天是新的一页，随便画点什么都很棒。", emoji: "🖌️" },
+        { text: "愿你睡个好觉，醒来又是好天气。", emoji: "😴" },
+        { text: "把焦虑换成具体的一小步行动。", emoji: "👟" },
+        { text: "你正在成为你想成为的人。", emoji: "🌱" },
+        { text: "最后一句话还是想说：天天开心！", emoji: "🌸" }
+      ];
+      var one = lines[Math.floor(Math.random() * lines.length)];
+      document.getElementById("msg").textContent = one.text;
+      document.getElementById("emoji").textContent = one.emoji;
+
+      function closePopup() {
+        document.getElementById("mask").classList.add("hidden");
+      }
+      document.getElementById("closeBtn").addEventListener("click", closePopup);
+
+      // 微信里部分版本对系统 alert 体验一般，上面用自定义弹窗；如需再弹一层系统框可取消下一行注释：
+      // setTimeout(function () { alert(one.text); }, 400);
+    })();
+  </script>
+</body>
+</html>
