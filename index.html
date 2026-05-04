@@ -3,31 +3,128 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <title>祝福连弹</title>
+  <title>愿你的一天</title>
   <style>
     * { box-sizing: border-box; }
-    body {
+    html, body {
       margin: 0;
-      min-height: 100vh;
-      font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
-      background: linear-gradient(160deg, #ffeef8 0%, #e8f4ff 45%, #fff9e6 100%);
+      height: 100%;
+      overflow: hidden;
+      font-family: "PingFang SC", "Microsoft YaHei", "SimHei", sans-serif;
+      background: #2b2b2b;
+      touch-action: manipulation;
+    }
+    #stage {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      background: linear-gradient(145deg, #1e1e2e 0%, #2d2d44 50%, #252535 100%);
+    }
+    .mini-win {
+      position: absolute;
+      width: 148px;
+      max-width: 42vw;
+      border-radius: 6px;
+      border: 1px solid rgba(0, 0, 0, 0.18);
+      box-shadow:
+        0 4px 14px rgba(0, 0, 0, 0.35),
+        0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+      overflow: hidden;
+      opacity: 0;
+      transform: scale(0.85);
+      animation: winIn 0.22s ease forwards;
+    }
+    @keyframes winIn {
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+    .mini-win-title {
+      height: 26px;
+      background: linear-gradient(180deg, #f5f5f5 0%, #e8e8e8 100%);
       display: flex;
-      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 6px 0 8px;
+      font-size: 10px;
+      color: #666;
+      border-bottom: 1px solid #ccc;
+      cursor: default;
+      user-select: none;
+    }
+    .mini-win-title span.title-text {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 600;
+      color: #444;
+    }
+    .mini-win-btns {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .mini-win-btns i {
+      font-style: normal;
+      width: 12px;
+      height: 12px;
+      line-height: 12px;
+      text-align: center;
+      font-size: 9px;
+      color: #555;
+      border-radius: 2px;
+    }
+    .mini-win-btns i:hover { background: rgba(0, 0, 0, 0.08); }
+    .mini-win-btns i.close:hover {
+      background: #e81123;
+      color: #fff;
+    }
+    .mini-win-body {
+      padding: 10px 8px 12px;
+      font-size: 12px;
+      line-height: 1.45;
+      text-align: center;
+      min-height: 56px;
+      max-height: 92px;
+      overflow-y: auto;
+      word-break: break-word;
+      display: flex;
       align-items: center;
       justify-content: center;
-      padding: 1.25rem;
-      text-align: center;
+      flex-direction: column;
+      color: #222;
+      text-shadow: 0 0 1px rgba(255, 255, 255, 0.4);
+      -webkit-overflow-scrolling: touch;
     }
-    h1 { font-size: 1.1rem; color: #444; margin: 0 0 0.5rem; font-weight: 600; }
-    .tip { font-size: 0.85rem; color: #888; line-height: 1.5; max-width: 20rem; }
-    .done { margin-top: 1rem; font-size: 1rem; color: #333; font-weight: 600; display: none; }
-    .done.show { display: block; }
+    .toolbar {
+      position: fixed;
+      left: 50%;
+      bottom: 12px;
+      transform: translateX(-50%);
+      z-index: 99999;
+      display: flex;
+      gap: 8px;
+    }
+    .toolbar button {
+      font-size: 13px;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.92);
+      color: #333;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    }
+    .toolbar button:active { opacity: 0.88; }
   </style>
 </head>
 <body>
-  <h1>祝福正在接连弹出</h1>
-  <p class="tip">请依次点「确定」关闭每个系统提示框，共 99 条且不重复。若没有任何弹窗，请检查浏览器是否拦截了本页弹窗。</p>
-  <p id="done" class="done" role="status">全部 99 条已送达～今天也要好好的。</p>
+  <div id="stage" aria-label="祝福小窗"></div>
+  <div class="toolbar">
+    <button type="button" id="btnClear">一键收走全部</button>
+  </div>
 
   <script>
     (function () {
@@ -133,6 +230,15 @@
         { text: "最后一句话还是想说：天天开心！", emoji: "🌸" }
       ];
 
+      var bgColors = [
+        "#FFB6C1", "#87CEEB", "#FFFACD", "#DDA0DD", "#FFE4E1",
+        "#98FB98", "#FFA07A", "#AFEEEE", "#F0E68C", "#E6E6FA",
+        "#FFDAB9", "#B0E0E6", "#FFDEAD", "#D8BFD8", "#7FFFD4",
+        "#FFB347", "#77DD77", "#F49AC2", "#AEC6CF", "#FDFD96"
+      ];
+
+      var titles = ["愿你的一天", "小纸条", "今日份", "悄悄话", "叮嘱一下"];
+
       function shuffle(arr) {
         var a = arr.slice();
         for (var i = a.length - 1; i > 0; i--) {
@@ -144,22 +250,76 @@
         return a;
       }
 
-      function run() {
-        var order = shuffle(lines);
-        var n = order.length;
-        for (var i = 0; i < n; i++) {
-          var item = order[i];
-          alert("【" + (i + 1) + " / " + n + "】" + item.emoji + "\n\n" + item.text);
-        }
-        document.getElementById("done").classList.add("show");
+      function rand(min, max) {
+        return min + Math.random() * (max - min);
       }
 
+      function spawnWindows() {
+        var stage = document.getElementById("stage");
+        var order = shuffle(lines);
+        var vw = window.innerWidth;
+        var vh = window.innerHeight;
+        var winW = Math.min(148, vw * 0.42);
+        var winH = 26 + 72;
+
+        order.forEach(function (item, i) {
+          setTimeout(function () {
+            var el = document.createElement("div");
+            el.className = "mini-win";
+            el.style.animationDelay = "0s";
+            el.style.zIndex = String(100 + i);
+
+            var maxX = Math.max(4, vw - winW - 4);
+            var maxY = Math.max(4, vh - winH - 56);
+            el.style.left = rand(4, maxX) + "px";
+            el.style.top = rand(4, maxY) + "px";
+
+            var bg = bgColors[i % bgColors.length];
+            if (Math.random() > 0.5) {
+              bg = bgColors[Math.floor(Math.random() * bgColors.length)];
+            }
+
+            var title = titles[Math.floor(Math.random() * titles.length)];
+
+            el.innerHTML =
+              '<div class="mini-win-title">' +
+              '<span class="title-text">' + title + "</span>" +
+              '<span class="mini-win-btns">' +
+              '<i>─</i><i>□</i><i class="close" title="关闭">×</i>' +
+              "</span></div>" +
+              '<div class="mini-win-body" style="background-color:' + bg + '">' +
+              item.emoji +
+              "<br/>" +
+              escapeHtml(item.text) +
+              "</div>";
+
+            el.querySelector(".close").addEventListener("click", function (e) {
+              e.stopPropagation();
+              el.remove();
+            });
+
+            stage.appendChild(el);
+          }, i * 35);
+        });
+      }
+
+      function escapeHtml(s) {
+        var d = document.createElement("div");
+        d.textContent = s;
+        return d.innerHTML;
+      }
+
+      document.getElementById("btnClear").addEventListener("click", function () {
+        document.getElementById("stage").innerHTML = "";
+      });
+
       if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", run);
+        document.addEventListener("DOMContentLoaded", spawnWindows);
       } else {
-        run();
+        spawnWindows();
       }
     })();
   </script>
 </body>
 </html>
+
